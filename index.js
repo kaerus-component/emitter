@@ -10,34 +10,32 @@ function Emitter(obj) {
     }
 
     if(!(this instanceof Emitter)) {
-        return new Emitter;
+        return new Emitter();
     }
 
-    this._events = {};  
+    this._events = {};
 }
 
 Emitter.prototype.listeners = function(event) {
     var handlers = this._events[event];
 
     if(!handlers) return [];
-    
-    return handlers.filter(function(f){return f !==before && f !==after});
-}
+
+    return handlers.filter(function(f){return f !==before && f !==after;});
+};
 
 Emitter.prototype.hasListeners = function(event) {
     return this.listeners(event).length > 0;
-}
+};
 
 Emitter.prototype.hasHandler = function(event,handler) {
     return this.listeners(event).filter(function(f) {
         return (f._of || f) !== handler;
-    }).length > 0; 
+    }).length > 0;
+};
 
-    return false;
-}
-
-function before(){};
-function after(){};
+function before(){}
+function after(){}
 
 Emitter.prototype.on = function(event,handler,first) {
     var events = this._events[event];
@@ -47,24 +45,24 @@ Emitter.prototype.on = function(event,handler,first) {
     if(first === true) events.splice(events.indexOf(before),0,handler);
     else if(first === undefined) events.splice(events.indexOf(after),0,handler);
     else events[events.length] = handler;
-   
+
     return this;
-}
+};
 
 Emitter.prototype.before = function(event,handler) {
     return this.on(event,handler,true);
-}
+};
 
 Emitter.prototype.after = function(event,handler) {
     return this.on(event,handler,false);
-}
+};
 
 Emitter.prototype.off = function(event,handler) {
     var listeners;
 
     if(!arguments.length) {
         this._events = {};
-    }    
+    }
     else {
         if(!handler) {
             this._events[event] = null;
@@ -76,7 +74,7 @@ Emitter.prototype.off = function(event,handler) {
     }
 
     return this;
-}
+};
 
 Emitter.prototype.emit = function(event) {
     var context, handler, args;
@@ -87,17 +85,17 @@ Emitter.prototype.emit = function(event) {
     }
 
     args = Array.prototype.slice.call(arguments, (context ? 2 : 1));
-    
+
     handler = this.listeners(event);
 
     context = context ? context : this;
 
     for(var i = 0, l = handler.length; i < l; i++){
         if(handler[i].apply(context,args) === false) break;
-    }        
+    }
 
     return this;
-}
+};
 
 Emitter.prototype.once = function(event,handler) {
     var self = this;
@@ -106,12 +104,12 @@ Emitter.prototype.once = function(event,handler) {
         self.off(event, handler);
         handler.apply(this, arguments);
     }
-    
+
     this.on(event, once);
 
     once._of = handler;
 
     return this;
-}
+};
 
 module.exports = Emitter;
